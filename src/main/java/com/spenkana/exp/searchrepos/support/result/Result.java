@@ -70,6 +70,14 @@ public class Result<T, E extends SafeError> implements Serializable {
         return new Result(error);
     }
 
+    public static <T> Result<T,SimpleError> failure(String msg){
+        return new Result(new SimpleError(msg));
+    }
+
+    public static <T> Result<T,ExceptionalError> failure(Exception e){
+        return new Result(new ExceptionalError(e));
+    }
+
     public T getOutput() {
             return output;
     }
