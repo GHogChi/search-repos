@@ -1,6 +1,5 @@
 package com.spenkana.exp.searchrepos.support.io;
 
-import com.spenkana.exp.searchrepos.support.result.ErrorList;
 import com.spenkana.exp.searchrepos.support.result.HttpError;
 import com.spenkana.exp.searchrepos.support.result.Result;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,7 @@ public class WhenHttpAdapterSendsGetRequest {
 
     @Test
     public void itReturnsResponse() {
-        ApacheHttpAdapter adapter = new ApacheHttpAdapter();
+        ApacheHttpPort adapter = new ApacheHttpPort();
         URI uri = new UriBuilder().scheme("https").authority("api.github.com")
             .path("search", "repositories").query("q", "lunch")
             .query("per_page", "1").query("page", "1").build();

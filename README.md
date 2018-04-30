@@ -35,6 +35,19 @@ parameters produce the correct results.
 - verify that non-numeric _page_ values result in
  graceful responses and informative error info.
  
+ ## The code
+ ### Pragmatic/Evolutionary coding
+ This is code that is written to be refactored. For example, the 
+ **ApacheHttpPort**, the **WebRequestAdapter**, and the test classes that use
+  them should undergo two types of refactoring:
+ - _Horizontal_: separation of concerns means that certain functionalities need
+  to be moved among these classes and existing functions need to be split. 
+  Example: HTTP header generation, which currently conflates domain semantics
+   and communication support.
+ - _Vertical_: Abstract ports and adapters should be extracted and perhaps 
+ moved into a general utility project. Headers passed into the port with each
+  request are redundant, and an immutable subclass of the port could have 
+  reusable headers injected at construction.
 
 ## Rationale
 

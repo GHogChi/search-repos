@@ -5,7 +5,7 @@ import com.spenkana.exp.searchrepos.support.result.Result;
 
 import java.net.URI;
 
-public class ApacheHttpAdapter {
+public class ApacheHttpPort {
     public Result<Json,HttpError> get(URI uri) {
         return null;
     }
