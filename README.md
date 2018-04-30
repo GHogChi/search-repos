@@ -1,5 +1,38 @@
 # search-repos: PoC for integrated test automation
 
+###Overview
+
+Focussing on two aspects of the GitHub API for searching repositories, this 
+project does not attempt to be exhaustive but to provide a library of support
+ functions for easy extension of test coverage.
+ 
+#### Name matching
+A problem for these tests is that we don't have an independent way of 
+verifying repository information.
+
+- using a string known to be part of the names of multiple repositories 
+("tetri" - based on an example in the documentation), 
+verify that every repository returned in the responses (multiple pages) 
+contains that string in its name.
+
+- verify that a nonsense string evokes a graceful response indicating that no
+ repositories match.
+
+##### proposed
+- generative test: given a random word chosen from a dictionary, verify that 
+either no repository name contains the stream or all repositories in 
+the response do.
+
+#### Pagination
+- verify (using fruitful names like "tetris" and randomly generated numbers 
+with a reasonable upper bound that the the _page_ and _per_page_ query 
+parameters produce the correct results.
+- verify that out-of-range page numbers (based on Link header info) result in
+ graceful responses and informative error info.
+- verify that non-numeric _page_ values result in
+ graceful responses and informative error info.
+ 
+
 ## Rationale
 
 This is opinionated code. Here are the opinions that have driven this project:
