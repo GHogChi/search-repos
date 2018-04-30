@@ -25,13 +25,12 @@ evolution through refinement of the metaphors that constitute the
 functional programming provides the basis for the cleanest and most efficient 
 code. 
 
-I have applied a refinement of [Hexagonal Architecture](http://alistair
-.cockburn.us/Hexagonal+architecture) 
+I have applied a refinement of [Hexagonal Architecture](http://alistair.cockburn.us/Hexagonal+architecture) 
 #### Fractality
 Every software object from the largest 
 distributed system down to a single line of code or machine instruction can 
 be logically analyzed into a 
--  a core - a [bounded context](https://martinfowler.com/bliki/BoundedContext.html) 
+-  a core - the [bounded context](https://martinfowler.com/bliki/BoundedContext.html) 
 ,
  and 
 - support elements 
@@ -39,8 +38,9 @@ be logically analyzed into a
   - and external 
 (ports and adapters).
 #### Core
-The core is an explicit domain model: the objects and functions of the domain
- (objects and arrows of the domain-as-[category](https://en.wikipedia.org/wiki/Category_theory)). 
+The core is an explicit domain model: the classes and functions/methods that 
+explicitly represent the domain
+ (== the objects and arrows of the domain-as-[category](https://en.wikipedia.org/wiki/Category_theory)). 
 #### Internal support
 [Pure functions](https://en.wikipedia.org/wiki/Pure_function), custom or 
 linked-in libraries.
