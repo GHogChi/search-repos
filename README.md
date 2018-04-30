@@ -17,7 +17,9 @@ possible information for rapidly locating, analyzing and fixing problems.
 
 ### Language and Architecture
 I used Java 8 because I can write it faster and more fluently than Scala, 
-which I would prefer otherwise. 
+which I would prefer otherwise. To mitigate some of the well-known weaknesses
+ of Java (exceptions and nulls), I've incorporated a **Result** monad and 
+ auxiliary **SafeError** classes.
 
 I believe that OOP brings support for 
 evolution through refinement of the metaphors that constitute the 
