@@ -1,15 +1,18 @@
 # search-repos: PoC for integrated test automation
 
-###Overview
+### Overview
 
 Focussing on two aspects of the GitHub API for searching repositories, this 
 project does not attempt to be exhaustive but to provide a library of support
  functions for easy extension of test coverage.
  
-#### Name matching
 A problem for these tests is that we don't have an independent way of 
-verifying repository information.
+verifying repository information other than the GitHub API. We can't tell 
+if a given query returns all matching repositories, only that the ones it 
+does return actually do match. Under normal development
+circumstances, this would be covered by whitebox testing. 
 
+#### Name matching
 - using a string known to be part of the names of multiple repositories 
 ("tetri" - based on an example in the documentation), 
 verify that every repository returned in the responses (multiple pages) 
@@ -20,7 +23,7 @@ contains that string in its name.
 
 ##### proposed
 - generative test: given a random word chosen from a dictionary, verify that 
-either no repository name contains the stream or all repositories in 
+either no repository name contains the string or all repositories in 
 the response do.
 
 #### Pagination
