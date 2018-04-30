@@ -1,4 +1,4 @@
-# search-repos: Rewards Network coding exercise
+# search-repos: PoC for integrated test automation
 
 ## Rationale
 
@@ -19,7 +19,8 @@ possible information for rapidly locating, analyzing and fixing problems.
 I used Java 8 because I can write it faster and more fluently than Scala, 
 which I would prefer otherwise. To mitigate some of the well-known weaknesses
  of Java (exceptions and nulls), I've incorporated a **Result** monad and 
- auxiliary **SafeError** classes.
+ auxiliary **SafeError** classes. (Scala is too permissive - it allows 
+ us to throw exceptions; it should only allow us to catch them.)
 
 I believe that OOP brings support for 
 evolution through refinement of the metaphors that constitute the 
