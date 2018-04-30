@@ -35,6 +35,15 @@ parameters produce the correct results.
 - verify that non-numeric _page_ values result in
  graceful responses and informative error info.
  
+## Running tests
+I run all the tests in Intellij IDEA. They can also be run from the 
+[Jupiter Console Launcher](https://junit.org/junit5/docs/current/user-guide/#running-tests-console-launcher).
+
+Tests of support code are in the **src/test** folders. Tests of the domain core 
+(i.e. the GitHub API) are in **src/main**. In IDEA, selecting the
+**Run All Tests** menu item will run both sets, regardless of the level at 
+which the menu is invoked.
+
  ## The code
  ### Pragmatic/Evolutionary coding
  This is code that is written to be refactored. For example, the 
@@ -48,20 +57,25 @@ parameters produce the correct results.
  moved into a general utility project. Headers passed into the port with each
   request are redundant, and an immutable subclass of the port could have 
   reusable headers injected at construction.
+ 
+ Because the tests are really the "production code", the Junit test classes 
+ are merely the reporting "shell" and the core functionality of the tests is 
+ in classes that are not dependent on Junit. The core Junit tests should 
+ eventually be replaced by a custom framework.
 
 ## Rationale
 
 This is opinionated code. Here are the opinions that have driven this project:
 
 ### Automated Testing
-_Test automation is software development._ I'm treating this exercise as a 
+**_Test automation is software development._** I'm treating this exercise as a 
 development project and applying "best practices" (a much-abused term) from 
 "normal" software development (I should say "functional+OOP server-side 
 development", 
 because browser-side development, in spite of all the over-hyped frameworks 
 and Node.js empire-building, is not ready for prime time).
 
-_Tests are not just pass/fail._ When they fail, they need to provide all  
+**_Tests are not just pass/fail._** When they fail, they need to provide all  
 possible information for rapidly locating, analyzing and fixing problems.
 
 ### Language 

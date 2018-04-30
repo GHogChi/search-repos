@@ -8,7 +8,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WhenHttpAdapterSendsGetRequest {
+public class WhenWebRequestAdapterSendsARequest {
     public static final String ACCEPT_HEADER =
         "Accept: application/vnd.github.v3+json ";
 
