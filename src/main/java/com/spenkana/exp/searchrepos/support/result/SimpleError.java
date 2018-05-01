@@ -2,26 +2,20 @@ package com.spenkana.exp.searchrepos.support.result;
 
 import java.text.MessageFormat;
 
-public class SimpleError extends SafeError<String> {
-    private final String message;
+//todo consider collapsing ExceptionalError into this class; create a
+// NO_EXCEPTION exception
+public class SimpleError extends SafeError {
     public static final SimpleError NOT_AN_ERROR = new SimpleError(NO_ERROR);
 
     public SimpleError(String message) {
-        this.message = message;
+        super(message);
     }
 
-    public String message() {
-        return message;
-    }
 
-    public String data() {
-        return message();
-    }
-
-    public static SafeError fromException(Exception e){
+    public static SimpleError fromException(Exception e) {
         return new SimpleError(MessageFormat.format(
-            "{0}: {1}", e.getClass().getName(),
-            e.getLocalizedMessage()
+            "{0}: {1}", e.getClass()
+                .getName(), e.getLocalizedMessage()
         ));
     }
 }

@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.toList;
  * uniformity.
  * @see SafeError
  */
-public class ErrorList extends SafeError<List<SafeError>> {
+public class ErrorList {
     private final List<SafeError> errors;
 
     public ErrorList(
@@ -36,8 +36,15 @@ public class ErrorList extends SafeError<List<SafeError>> {
         return errors;
     }
 
-    @Override
     public int errorCount() {
         return errors.size();
+    }
+
+    public boolean hasErrors() {
+        return errors.size() > 0;
+    }
+
+    public SafeError asError() {
+        return new SimpleError(message());
     }
 }

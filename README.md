@@ -46,13 +46,16 @@ which the menu is invoked.
 
  ## The code
  ### Pragmatic/Evolutionary coding
+ Following the XP principle of minimalism, this code implements only what is 
+ needed for the current tasks. It's definitely skeletal.
+ 
  This is code that is written to be refactored. For example, the 
  **ApacheHttpPort**, the **WebRequestAdapter**, and the test classes that use
   them should undergo two types of refactoring:
  - _Horizontal_: separation of concerns means that certain functionalities need
   to be moved among these classes and existing functions need to be split. 
-  Example: HTTP header generation, which currently conflates domain semantics
-   and communication support.
+  Example: URI and HTTP header generation, which currently conflate domain 
+  semantics and communication support.
  - _Vertical_: Abstract ports and adapters should be extracted and perhaps 
  moved into a general utility project. Headers passed into the port with each
   request are redundant, and an immutable subclass of the port could have 
