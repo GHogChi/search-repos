@@ -4,7 +4,6 @@ package com.spenkana.exp.searchrepos.support.result;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static com.spenkana.exp.searchrepos.support.result.SafeError.NO_ERROR;
 import static com.spenkana.exp.searchrepos.support.result.SimpleError
     .NOT_AN_ERROR;
 //TODO solve: method signatures can't specify error type - causes casting
@@ -31,7 +30,7 @@ public class Result<T> implements Serializable {
     public final boolean ok;
     public final T output;
     public final SafeError error;
-    public static final Object nullObject = new Object();
+    private static final Object nullObject = new Object();
 
     /**
      * For serialization only.
@@ -39,7 +38,7 @@ public class Result<T> implements Serializable {
     public Result() {
         ok = false;
         output = null;
-        error = (SafeError) NOT_AN_ERROR;
+        error = NOT_AN_ERROR;
     }
 
     private Result(T output, SafeError error) {
@@ -51,7 +50,7 @@ public class Result<T> implements Serializable {
     private Result(T output) {
         this.output = output;
         ok = true;
-        error = (SafeError) NOT_AN_ERROR;
+        error = NOT_AN_ERROR;
     }
 
     public boolean succeeded() {
@@ -63,23 +62,23 @@ public class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> success(T output) {
-        return new Result(output, NOT_AN_ERROR);
+        return new Result<>((T) output, NOT_AN_ERROR);
     }
 
     public static Result<Void> success() {
-        return new Result<>();
+        return new Result<>(null, NOT_AN_ERROR);
     }
 
     public static <T> Result<T> failure(SafeError error){
-        return new Result(nullObject, error);
+        return new Result<>(null, error);
     }
 
     public static <T> Result<T> failure(String msg){
-        return new Result(nullObject, new SimpleError(msg));
+        return new Result<>(null, new SimpleError(msg));
     }
 
     public static <T> Result<T> failure(Exception e){
-        return new Result(new ExceptionalError(e, ""));
+        return new Result<T>(null, new ExceptionalError(e, ""));
     }
 
     public T getOutput() {

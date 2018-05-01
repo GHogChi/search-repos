@@ -1,32 +1,67 @@
 package com.spenkana.exp.searchrepos.support.io;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
+import com.spenkana.exp.searchrepos.support.FieldHandler;
 import com.spenkana.exp.searchrepos.support.result.HttpStatus;
 import com.spenkana.exp.searchrepos.support.result.Result;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
+import static com.spenkana.exp.searchrepos.support.FieldHandler.FieldType
+    .BOOLEAN;
+import static com.spenkana.exp.searchrepos.support.FieldHandler.FieldType
+    .INTEGER;
+import static com.spenkana.exp.searchrepos.support.FieldHandler
+    .createFieldHandler;
+import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 //TODO separate "slow" integration tests like this from fast unit tests
 public class WhenThePortSendsARestfulGetRequest {
-    private JsonFactory jfactory = new JsonFactory();
-    private JsonParser jParser;
+    int count = -1;
+    boolean incompleteResults = true;
 
     @Test
     public void itReturnsTheJsonResponse() throws IOException {
         Result<WebResponse> result = getTheWebResponse();
 
-        final String content = result.getOutput().body.asString;
-//            if (fieldResult.failed()){
-//                fail(fieldResult.getErrorMessage());
-//            }
-//        }
+        String content = result.getOutput().body.asString;
+        List<FieldHandler> handlers = new ArrayList<>();
+        handlers.add(createFieldHandler("total_count",
+            n -> {
+                try {
+                    setCount((Integer) n);
+                } catch (Exception e) {
+                    return failure(e);
+                }
+                return success();
+            }, INTEGER).output);
+
+        handlers.add(createFieldHandler("incomplete_results",
+            b -> {
+                try {
+                    setIncompleteResults((Boolean) b);
+                } catch (Exception e) {
+                    return failure(e);
+                }
+                return success();
+            }, BOOLEAN).getOutput());
+        Result<Void> parseResult = Json.parse(content, handlers);
+        assertTrue(parseResult.succeeded());
+        assertEquals(count, 0);
+        assertEquals(incompleteResults, false);
+    }
+
+    private void setIncompleteResults(Boolean b) {
+        incompleteResults = b;
+    }
+
+    private void setCount(Integer n) {
+        count = n;
     }
 
 

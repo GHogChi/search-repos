@@ -1,30 +1,27 @@
 package com.spenkana.exp.searchrepos.support.io;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spenkana.exp.searchrepos.support.FieldExpectation;
+import com.spenkana.exp.searchrepos.support.FieldHandler;
 import com.spenkana.exp.searchrepos.support.result.ErrorList;
 import com.spenkana.exp.searchrepos.support.result.ExceptionalError;
 import com.spenkana.exp.searchrepos.support.result.Result;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static com.fasterxml.jackson.core.JsonToken.END_OBJECT;
+import static com.fasterxml.jackson.core.JsonToken.FIELD_NAME;
 import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
-import static com.spenkana.exp.searchrepos.support.result.SimpleError
-    .fromException;
 
 //TODO remove redundancy in methods
 public class Json {
     final String asString;
     final Class<?> theClass;
-    private JsonFactory factory;
+    private static JsonFactory factory;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -36,6 +33,64 @@ public class Json {
         asString = objectMapper.writeValueAsString(obj);
         this.theClass = theClass;
     }
+
+    public static Result<Void> parse(
+        String jsonString, List<FieldHandler> handlers) {
+        if (handlers == null || handlers.size() == 0) {
+            return failure("No handlers passed");
+        }
+        Map<String, FieldHandler> handlersByFieldName = new HashMap<>();
+        for (FieldHandler handler : handlers) {
+            handlersByFieldName.put(handler.fieldName, handler);
+        }
+        Result<JsonParser> result = getStreamParser(jsonString);
+        if (result.failed()){
+            return failure(result.error);
+        }
+        JsonParser parser = result.output;
+        ErrorList errors = new ErrorList();
+        try {
+            for (JsonToken token = null;
+                 token != END_OBJECT;
+                 token = parser.nextToken()) {
+                if (token != FIELD_NAME) continue;
+                String fieldName = parser.getCurrentName();
+                if (handlersByFieldName.containsKey(fieldName)) {
+                    FieldHandler handler = handlersByFieldName.get(fieldName);
+                    parser.nextToken();
+                    Object currentValue = getFieldValue(parser, handler);
+                    Result<Void> handlerResult =
+                        handler.handle(currentValue);
+                    if (handlerResult.failed()) {
+                        errors.add(handlerResult.error);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            errors.add(e);
+        }
+        return errors.errorCount() > 0
+            ? failure(errors.asError())
+            : success();
+    }
+
+    private static Object getFieldValue(JsonParser parser, FieldHandler handler)
+        throws IOException {
+        Object currentValue = null;
+        switch (handler.fieldType){
+            case INTEGER:
+                currentValue = parser.getIntValue();
+                break;
+            case BOOLEAN:
+                currentValue = parser.getBooleanValue();
+                break;
+            case STRING:
+                currentValue = parser.getText();
+                break;
+        }
+        return currentValue;
+    }
+
     public static Result<Json> fromObject(Object obj) {
         Json json;
         try {
@@ -57,90 +112,31 @@ public class Json {
         }
     }
 
-    public Result<Void> checkFieldValues(
-        Map<String, FieldExpectation> expectationsByName) {
-        Map<String, FieldExpectation> missingFields =
-            new HashMap<>(expectationsByName);
-        ErrorList errorList = new ErrorList();
-        JsonParser parser = getParser(errorList);
-        if (parser == null) {
-            return failure(errorList.asError());
-        }
-        try {
-            while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String fieldName = parser.getCurrentName();
-                if (fieldName == null) continue;
-                if (expectationsByName.containsKey(fieldName)) {
-                    FieldExpectation expectation =
-                        expectationsByName.get(fieldName);
-                    switch (expectation.expectedClass.getName()) {
-                        case "Integer":
-                    }
-                }
-            }
-        } catch (IOException e) {
-            errorList.add(fromException(e));
-        }
-        return success();
-    }
-
-    private static Result<Void> checkBooleanFieldValue(
-        String fieldname, boolean expectedValue, JsonParser jParser)
-        throws IOException {
-        jParser.nextToken();
-        Boolean value = jParser.getBooleanValue();
-        if (!value.equals(expectedValue)) {
-            final String message = MessageFormat
-                .format("Expected {0} to be {1}, got {2}",
-                    fieldname, expectedValue, value);
-            return failure(message);
-        }
-        return success();
-    }
-
-    private static Result<Void> checkStringFieldValue(
-        String fieldname, String expectedValue, JsonParser jParser)
-        throws IOException {
-        jParser.nextToken();
-        String value = jParser.getText();
-        if (!value.equals(expectedValue)) {
-            final String message = MessageFormat
-                .format("Expected {0} to be {1}, got {2}",
-                    fieldname, expectedValue, value);
-            return failure(message);
-        }
-        return success();
-    }
-
-    private static Result<Void> checkIntFieldValue(
-        String fieldname, int expectedValue, JsonParser jParser)
-        throws IOException {
-        jParser.nextToken();
-        Integer value = jParser.getIntValue();
-        if (!value.equals(expectedValue)) {
-            final String message = MessageFormat
-                .format("Expected {0} to be {1}, got {2}",
-                    fieldname, expectedValue, value);
-            return failure(message);
-        }
-        return success();
-    }
-
     @Override
     public String toString() {
         return asString;
     }
 
-    private JsonParser getParser(ErrorList errorList) {
+    private static Result<JsonParser> getStreamParser(
+        String jsonString) {
         JsonParser parser = null;
         if (factory == null) {
             factory = new JsonFactory();
             try {
-                parser = factory.createParser(asString);
-            } catch (IOException e) {
-                errorList.add(new ExceptionalError(e));
+                parser = factory.createParser(jsonString);
+            } catch (Exception e) {
+                return failure(e);
             }
         }
-        return parser;
+        return success(parser);
+    }
+
+    public Result<Object> asObject() {
+        try {
+            Object object = new ObjectMapper().readValue(asString, theClass);
+            return success(object);
+        } catch (Exception e) {
+            return failure(e);
+        }
     }
 }

@@ -27,13 +27,16 @@ public class ErrorList {
         errors.add(error);
     }
 
-    public String message() {
-        return String.join(",",
-            errors.stream().map(e->message()).collect(toList()));
+    public void add(String errorMessage){
+        errors.add(new SimpleError(errorMessage));
     }
 
-    public List<SafeError> data() {
-        return errors;
+    public void add(Exception e){
+        errors.add(new ExceptionalError(e));
+    }
+    public String message() {
+        return String.join(",\n",
+            errors.stream().map(e->e.message).collect(toList()));
     }
 
     public int errorCount() {
@@ -41,7 +44,7 @@ public class ErrorList {
     }
 
     public boolean hasErrors() {
-        return errors.size() > 0;
+        return errorCount() > 0;
     }
 
     public SafeError asError() {
