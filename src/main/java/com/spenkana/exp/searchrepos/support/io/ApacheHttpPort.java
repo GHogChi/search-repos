@@ -1,8 +1,11 @@
 package com.spenkana.exp.searchrepos.support.io;
 
-import com.spenkana.exp.searchrepos.support.result.*;
+import com.spenkana.exp.searchrepos.support.result.ExceptionalError;
+import com.spenkana.exp.searchrepos.support.result.HttpStatus;
+import com.spenkana.exp.searchrepos.support.result.Result;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -11,15 +14,16 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.spenkana.exp.searchrepos.support.io.Json.fromString;
 import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
-
+//todo support streams and other RESTful commands
 public class ApacheHttpPort {
 
-    String dummy = "{\"total_count\": 0,\"incomplete_results\": false," +
-        "\"items\": [ ]}";
+    public static final String WHOLE_HEADER_VALUE = "WholeHeaderValue";
 
     public Result<WebResponse> get(URI uri) {
         Result<WebResponse> result = submitRequest(uri);
@@ -48,7 +52,18 @@ public class ApacheHttpPort {
             cleanUp(response);
             return failure(statusResult.error);
         }
-        String jsonString = null;
+        Header[] headers = response.getAllHeaders();
+        Map<String, Map<String, String>> headersByName = new HashMap<>();
+        for(Header header: headers){
+            HeaderElement[] elements = header.getElements();
+            Map<String, String> elementsByName = new HashMap<>();
+            elementsByName.put(WHOLE_HEADER_VALUE, header.getValue());
+            for (HeaderElement element: elements){
+                elementsByName.put(element.getName(), element.getValue());
+            }
+            headersByName.put(header.getName(), elementsByName);
+        }
+        String jsonString;
         try {
             jsonString = EntityUtils.toString(entity);
         } catch (IOException e1) {
@@ -62,8 +77,8 @@ public class ApacheHttpPort {
         }
         cleanUp(response);
         return success(new WebResponse(
-            jsonResult.getOutput(),
-            statusResult.getOutput())
+            jsonString,
+            statusResult.getOutput(), headersByName)
         );
 
     }

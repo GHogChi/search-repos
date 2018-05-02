@@ -1,6 +1,9 @@
 package com.spenkana.exp.searchrepos.support.io;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spenkana.exp.searchrepos.support.FieldHandler;
 import com.spenkana.exp.searchrepos.support.result.ErrorList;
@@ -17,10 +20,11 @@ import static com.fasterxml.jackson.core.JsonToken.FIELD_NAME;
 import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
 
-//TODO remove redundancy in methods
+//TODO parsing needs bulletproofing - it ignores structure -
+//e.g., will match fields at any level
 public class Json {
-    final String asString;
-    final Class<?> theClass;
+    private final String asString;
+    public final Class<?> theClass;
     private static JsonFactory factory;
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -44,7 +48,7 @@ public class Json {
             handlersByFieldName.put(handler.fieldName, handler);
         }
         Result<JsonParser> result = getStreamParser(jsonString);
-        if (result.failed()){
+        if (result.failed()) {
             return failure(result.error);
         }
         JsonParser parser = result.output;
@@ -59,8 +63,7 @@ public class Json {
                     FieldHandler handler = handlersByFieldName.get(fieldName);
                     parser.nextToken();
                     Object currentValue = getFieldValue(parser, handler);
-                    Result<Void> handlerResult =
-                        handler.handle(currentValue);
+                    Result<Void> handlerResult = handler.handle(currentValue);
                     if (handlerResult.failed()) {
                         errors.add(handlerResult.error);
                     }
@@ -77,7 +80,7 @@ public class Json {
     private static Object getFieldValue(JsonParser parser, FieldHandler handler)
         throws IOException {
         Object currentValue = null;
-        switch (handler.fieldType){
+        switch (handler.fieldType) {
             case INTEGER:
                 currentValue = parser.getIntValue();
                 break;
@@ -122,11 +125,11 @@ public class Json {
         JsonParser parser = null;
         if (factory == null) {
             factory = new JsonFactory();
-            try {
-                parser = factory.createParser(jsonString);
-            } catch (Exception e) {
-                return failure(e);
-            }
+        }
+        try {
+            parser = factory.createParser(jsonString);
+        } catch (Exception e) {
+            return failure(e);
         }
         return success(parser);
     }

@@ -2,21 +2,23 @@ package com.spenkana.exp.searchrepos.support.io;
 
 import com.spenkana.exp.searchrepos.support.result.HttpStatus;
 
-public class WebResponse {
-    public final Json body;
-    public final HttpStatus status;
+import java.util.Collections;
+import java.util.Map;
 
-    public WebResponse(Json body,
-                       HttpStatus status) {
+//todo need to handle input streams
+public class WebResponse {
+    public final String body;
+    public final HttpStatus status;
+    private final Map<String, Map<String, String>> headersByName;
+
+    public WebResponse(String body, HttpStatus status,
+                       Map<String, Map<String, String>> headersByName) {
         this.body = body;
         this.status = status;
+        this.headersByName = headersByName;
     }
 
-    public Json getBody() {
-        return body;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
+    public Map<String, Map<String, String>> getHeaders(){
+        return Collections.unmodifiableMap(headersByName);
     }
 }

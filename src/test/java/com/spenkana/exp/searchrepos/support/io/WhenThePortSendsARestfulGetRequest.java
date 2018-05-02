@@ -5,7 +5,6 @@ import com.spenkana.exp.searchrepos.support.result.HttpStatus;
 import com.spenkana.exp.searchrepos.support.result.Result;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,44 +15,40 @@ import static com.spenkana.exp.searchrepos.support.FieldHandler.FieldType
     .INTEGER;
 import static com.spenkana.exp.searchrepos.support.FieldHandler
     .createFieldHandler;
-import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
 import static org.junit.jupiter.api.Assertions.*;
 
 //TODO separate "slow" integration tests like this from fast unit tests
 public class WhenThePortSendsARestfulGetRequest {
-    int count = -1;
-    boolean incompleteResults = true;
+    private int count = -1;
+    private boolean incompleteResults = true;
 
     @Test
-    public void itReturnsTheJsonResponse() throws IOException {
+    public void itReturnsTheJsonResponse() {
         Result<WebResponse> result = getTheWebResponse();
 
-        String content = result.getOutput().body.asString;
+        String content = result.getOutput().body;
+        List<FieldHandler> handlers = buildFieldHandlers();
+        Result<Void> parseResult = Json.parse(content, handlers);
+        assertTrue(parseResult.succeeded());
+        assertEquals(count, 0);
+        assertFalse(incompleteResults);
+    }
+
+    private List<FieldHandler> buildFieldHandlers() {
         List<FieldHandler> handlers = new ArrayList<>();
         handlers.add(createFieldHandler("total_count",
             n -> {
-                try {
-                    setCount((Integer) n);
-                } catch (Exception e) {
-                    return failure(e);
-                }
+                setCount((Integer) n);
                 return success();
             }, INTEGER).output);
 
         handlers.add(createFieldHandler("incomplete_results",
             b -> {
-                try {
-                    setIncompleteResults((Boolean) b);
-                } catch (Exception e) {
-                    return failure(e);
-                }
+                setIncompleteResults((Boolean) b);
                 return success();
             }, BOOLEAN).getOutput());
-        Result<Void> parseResult = Json.parse(content, handlers);
-        assertTrue(parseResult.succeeded());
-        assertEquals(count, 0);
-        assertEquals(incompleteResults, false);
+        return handlers;
     }
 
     private void setIncompleteResults(Boolean b) {
@@ -75,7 +70,6 @@ public class WhenThePortSendsARestfulGetRequest {
 
 
     private Result<WebResponse> getTheWebResponse() {
-        ApacheHttpPort port = new ApacheHttpPort();
         Result<URI> result = new UriBuilder()
             .scheme("https")
             .authority("api.github.com")
@@ -83,9 +77,7 @@ public class WhenThePortSendsARestfulGetRequest {
             .query("q", "notARepoNameWeHope")
             .build();
         URI uri = result.getOutput();
-        Result<WebResponse> webResult = port.get(uri);
-        assertTrue(result.succeeded());
-        return success(webResult.getOutput());
+        return WebRequestAdapter.submitWebRequest(uri);
     }
 
 }

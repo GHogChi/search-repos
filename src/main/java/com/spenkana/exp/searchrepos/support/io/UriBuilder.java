@@ -11,7 +11,7 @@ import java.util.List;
 import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
 
-class UriBuilder {
+public class UriBuilder {
     public static final String PATH_DELIMITER = "/";
     public static final String QUERY_ASSIGN_OP = "=";
     private String scheme;
