@@ -64,7 +64,7 @@ public class WhenThePortSendsARestfulGetRequest {
     public void itReturnsTheStatus() {
         Result<WebResponse> result = getTheWebResponse();
 
-        assertSame(result.getOutput().status, HttpStatus.SUCCESS);
+        assertSame(result.getOutput().status, HttpStatus.OK);
 
     }
 
@@ -74,10 +74,10 @@ public class WhenThePortSendsARestfulGetRequest {
             .scheme("https")
             .authority("api.github.com")
             .path("search", "repositories")
-            .query("q", "notARepoNameWeHope")
+            .queryElement("q", "notARepoNameWeHope")
             .build();
         URI uri = result.getOutput();
-        return WebRequestAdapter.submitWebRequest(uri);
+        return GitHubRepositorySearchAdapter.submitWebRequest(uri);
     }
 
 }

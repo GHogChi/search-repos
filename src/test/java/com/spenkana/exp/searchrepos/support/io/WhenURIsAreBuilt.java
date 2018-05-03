@@ -23,7 +23,7 @@ public class WhenURIsAreBuilt {
        URI original = buildOriginal();
        URI updated = new UriBuilder(original)
            .replaceQuery("q","x")
-           .query("z","m")
+           .queryElement("z","m")
            .build()
            .getOutput();
        assertNotEquals(updated, original);
@@ -34,8 +34,8 @@ public class WhenURIsAreBuilt {
             .scheme("https")
             .authority("com.spenkana")
             .path("a","b")
-            .query("x","xval")
-            .query("y","yval")
+            .queryElement("x","xval")
+            .queryElement("y","yval")
             .build()
             .getOutput();
     }

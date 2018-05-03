@@ -14,8 +14,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.spenkana.exp.searchrepos.support.io.Json.fromString;
 import static com.spenkana.exp.searchrepos.support.result.Result.failure;
@@ -52,17 +51,7 @@ public class ApacheHttpPort {
             cleanUp(response);
             return failure(statusResult.error);
         }
-        Header[] headers = response.getAllHeaders();
-        Map<String, Map<String, String>> headersByName = new HashMap<>();
-        for(Header header: headers){
-            HeaderElement[] elements = header.getElements();
-            Map<String, String> elementsByName = new HashMap<>();
-            elementsByName.put(WHOLE_HEADER_VALUE, header.getValue());
-            for (HeaderElement element: elements){
-                elementsByName.put(element.getName(), element.getValue());
-            }
-            headersByName.put(header.getName(), elementsByName);
-        }
+        Map<String, List<String>> parsedHeadersByName = getHeaders(response);
         String jsonString;
         try {
             jsonString = EntityUtils.toString(entity);
@@ -77,10 +66,23 @@ public class ApacheHttpPort {
         }
         cleanUp(response);
         return success(new WebResponse(
-            jsonString,
-            statusResult.getOutput(), headersByName)
-        );
+            jsonString, statusResult.getOutput(), parsedHeadersByName));
 
+    }
+
+    private Map<String, List<String>> getHeaders(
+        CloseableHttpResponse response) {
+        Header[] headers = response.getAllHeaders();
+        Map<String, List<String>> parsedHeadersByName = new HashMap<>();
+        for(Header header: headers){
+            List<String> elements = new ArrayList<>();
+            elements.add(header.getValue());
+            for(HeaderElement element: header.getElements()){
+                elements.add(element.getValue());
+            }
+            parsedHeadersByName.put(header.getName(), elements);
+        }
+        return parsedHeadersByName;
     }
 
     private void cleanUp(CloseableHttpResponse response) {

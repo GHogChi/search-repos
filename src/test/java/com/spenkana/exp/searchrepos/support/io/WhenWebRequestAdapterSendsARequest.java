@@ -18,9 +18,9 @@ public class WhenWebRequestAdapterSendsARequest {
             new UriBuilder().scheme("https")
                 .authority("api.github.com")
                 .path("search", "repositories")
-                .query("q", "lunch")
-                .query("per_page", "1")
-                .query("page", "1")
+                .queryElement("q", "lunch")
+                .queryElement("per_page", "1")
+                .queryElement("page", "1")
                 .build();
         if (uriresult.failed()){
             fail(uriresult.getErrorMessage());

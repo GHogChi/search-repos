@@ -5,19 +5,24 @@ import com.spenkana.exp.searchrepos.support.result.SimpleError;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
 
+/**
+ * Builds a new URI or clones an existing URI with optional updates.
+ * Setter functions are idempotent.
+ */
 public class UriBuilder {
     public static final String PATH_DELIMITER = "/";
     public static final String QUERY_ASSIGN_OP = "=";
     private String scheme;
     private String authority;
     private StringBuilder path = new StringBuilder();
-    private List<QueryElement> queryList = new ArrayList<>();
+    private Map<String, QueryElement> queryElementsByKey = new HashMap<>();
     private String fragment = null;
 
     public UriBuilder() {
@@ -28,15 +33,17 @@ public class UriBuilder {
         scheme = uriToUpdate.getScheme();
         authority = uriToUpdate.getRawAuthority();
         path.append(uriToUpdate.getRawPath());
-        setQuery(uriToUpdate.getQuery(), queryList);
+        setQuery(uriToUpdate.getQuery(), queryElementsByKey);
     }
 
-    private static void setQuery(String query, List<QueryElement> queryList) {
+    private static void setQuery(
+        String query, Map<String, QueryElement> queryElementsByKey) {
         if (!StringUtils.isEmpty(query)) {
             String[] qElems = query.split("&");
             for (String qe : qElems) {
                 String[] fields = qe.split(QUERY_ASSIGN_OP);
-                queryList.add(new QueryElement(fields[0], fields[1]));
+                final String key = fields[0];
+                queryElementsByKey.put(key, new QueryElement(key, fields[1]));
             }
         }
     }
@@ -59,20 +66,32 @@ public class UriBuilder {
         return this;
     }
 
-    public UriBuilder query(String key, String value) {
-        queryList.add(new QueryElement(key, value));
+    /**
+     * Will replace queryElement with same key if present.
+     * @param key
+     * @param value
+     * @return
+     */
+    public UriBuilder queryElement(String key, String value) {
+        queryElementsByKey.put(key, new QueryElement(key, value));
+        return this;
+    }
+
+    public UriBuilder fragment(String fragment) {
+        this.fragment = fragment;
         return this;
     }
 
     public Result<URI> build() {
         URI uri;
         String query = "";
-        if (queryList.size() > 0) {
+        if (queryElementsByKey.size() > 0) {
             StringBuilder qb = new StringBuilder();
-            for (QueryElement qe : queryList) {
-                qb.append(qe.key)
+            for (Map.Entry qe : queryElementsByKey.entrySet()) {
+                String value = ((QueryElement)qe.getValue()).value;
+                qb.append(qe.getKey())
                     .append("=")
-                    .append(qe.value)
+                    .append(value)
                     .append("&");
             }
             qb.deleteCharAt(qb.length() - 1);
@@ -88,10 +107,16 @@ public class UriBuilder {
         return success(uri);
     }
 
-    public UriBuilder replaceQuery(String q, String value) {
-        queryList.clear();
-        return query(q, value);
+    public UriBuilder replaceQuery(String key, String value) {
+        clearQuery();
+        return queryElement(key, value);
     }
+
+    public UriBuilder clearQuery() {
+        queryElementsByKey.clear();
+        return this;
+    }
+
 }
 
 class QueryElement {
@@ -101,6 +126,21 @@ class QueryElement {
     public QueryElement(String fieldName, String value) {
         this.key = fieldName;
         this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QueryElement element = (QueryElement) o;
+        return Objects.equals(key, element.key) &&
+            Objects.equals(value, element.value);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(key, value);
     }
 }
 

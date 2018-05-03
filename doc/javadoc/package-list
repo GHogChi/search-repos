@@ -1,1 +1,4 @@
+com.spenkana.exp.searchrepos.domain
 com.spenkana.exp.searchrepos.support
+com.spenkana.exp.searchrepos.support.io
+com.spenkana.exp.searchrepos.support.result
