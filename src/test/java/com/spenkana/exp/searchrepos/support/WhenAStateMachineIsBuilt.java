@@ -1,16 +1,23 @@
 package com.spenkana.exp.searchrepos.support;
 
-import com.spenkana.exp.searchrepos.support.StateMachine.EventHandler;
-import com.spenkana.exp.searchrepos.support.StateMachine.EventHandlersById;
-import com.spenkana.exp.searchrepos.support.result.Result;
+import com.spenkana.exp.searchrepos.support.events.Event;
+import com.spenkana.exp.searchrepos.support.io.json.JsonAdapter;
+import com.spenkana.exp.searchrepos.support.io.json.JsonEventType;
+import com.spenkana.exp.searchrepos.support.io.json.JsonAdapter.JsonElement;
+import com.spenkana.exp.searchrepos.support.stateMachine.EventHandler;
+import com.spenkana.exp.searchrepos.support.stateMachine.StateMachine;
+import com.spenkana.exp.searchrepos.support.stateMachine.StateMachine
+    .EventHandlersByEventType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
+import static com.spenkana.exp.searchrepos.support.io.json.JsonEventType
+    .STRUCTURE_INFO;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WhenAStateMachineIsBuilt {
 
@@ -27,24 +34,22 @@ public class WhenAStateMachineIsBuilt {
     @Test
     public void itRunsFineOnEmpty() {
         String startId = "start", endId = "end";
-        StateMachine<String> machine = new StateMachine<>(NULL_PAYLOAD,
-            new EventHandlersById());
+        StateMachine<JsonEventType, JsonElement> machine = new
+            StateMachine(NULL_PAYLOAD, new EventHandlersByEventType());
 
-        assertEquals(TOP_STRUCTURE_ID, machine.idCurrentStructure());
-        assertTrue(machine.acceptEvent(
-            new StateMachine.Event<>(startId, NULL_PAYLOAD))
-            .succeeded());
-        assertEquals(TOP_STRUCTURE_ID, machine.idCurrentStructure());
-        assertTrue(machine.acceptEvent(
-            new StateMachine.Event<>(endId, NULL_PAYLOAD))
-            .succeeded());
-        assertEquals(TOP_STRUCTURE_ID, machine.idCurrentStructure());
+        assertEquals(TOP_STRUCTURE_ID, machine.idCurrentHandlerGroup());
+        machine.accept(new Event(startId, NULL_PAYLOAD));
+        assertEquals(TOP_STRUCTURE_ID, machine.idCurrentHandlerGroup());
+        machine.accept(
+            new JsonAdapter.JsonParseEvent(STRUCTURE_INFO, NULL_PAYLOAD)
+        );
+        assertEquals(TOP_STRUCTURE_ID, machine.idCurrentHandlerGroup());
     }
 
 
     @Test
     public void handlerIsInvokedForEvent() {
-        EventHandlersById handlers = new EventHandlersById();
+        EventHandlersByEventType handlers = new EventHandlersByEventType();
         String hiworld = "hiworld";
         handlers.put(hiworld, new EventHandler(hiworld,
             (s, vc) -> {
@@ -53,10 +58,9 @@ public class WhenAStateMachineIsBuilt {
             },
             hiworld
         ));
-        StateMachine<String> machine = new StateMachine<>("", handlers);
+        StateMachine<JsonEventType, JsonElement> machine = new StateMachine("", handlers);
 
-        Result<Void> result =
-            machine.acceptEvent(new StateMachine.Event<>(hiworld, "loworld"));
+            machine.accept(new Event(hiworld, "loworld"));
         assertEquals("hiworld: loworld", miscellany.get(hiworld));
     }
 

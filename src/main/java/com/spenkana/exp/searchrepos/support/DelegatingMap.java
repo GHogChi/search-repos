@@ -1,75 +1,87 @@
 package com.spenkana.exp.searchrepos.support;
 
+import com.spenkana.exp.searchrepos.support.result.Result;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.spenkana.exp.searchrepos.support.result.Result.failure;
+import static com.spenkana.exp.searchrepos.support.result.Result.success;
+
 /**
  * A lot of work just to delegate and provide a simple name.
  * At least the IDE could help.
  */
-class DelegatingMap<K,V> implements Map<K, V> {
-    private final Map<K,V> delegatee = new HashMap<>();
+public class DelegatingMap<K,V> implements Map<K, V> {
+    private final Map<K,V> delegate = new HashMap<>();
 
     @Override
     public int size() {
-        return delegatee.size();
+        return delegate.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return delegatee.isEmpty();
+        return delegate.isEmpty();
     }
 
     @Override
     public boolean containsKey(Object key) {
-        return delegatee.containsKey(key);
+        return delegate.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        return delegatee.containsValue(value);
+        return delegate.containsValue(value);
+    }
+
+    public Result<V> safelyGet(K key){
+        if(!delegate.containsKey(key)){
+            return failure("Key is not in map");
+        }
+        return success(delegate.get(key));
     }
 
     @Override
     public V get(Object key) {
-        return delegatee.get(key);
+        return delegate.get(key);
     }
 
     @Override
     public V put(K key, V value) {
-        return delegatee.put(key, value);
+        return delegate.put(key, value);
     }
 
     @Override
     public V remove(Object key) {
-        return delegatee.remove(key);
+        return delegate.remove(key);
     }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        delegatee.putAll(m);
+        delegate.putAll(m);
     }
 
     @Override
     public void clear() {
-        delegatee.clear();
+        delegate.clear();
     }
 
     @Override
     public Set<K> keySet() {
-        return delegatee.keySet();
+        return delegate.keySet();
     }
 
     @Override
     public Collection<V> values() {
-        return delegatee.values();
+        return delegate.values();
     }
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        return delegatee.entrySet();
+        return delegate.entrySet();
     }
 
 }

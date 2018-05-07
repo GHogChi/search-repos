@@ -1,5 +1,6 @@
 package com.spenkana.exp.searchrepos.support.io;
 
+import com.spenkana.exp.searchrepos.support.io.json.jackson.Json;
 import com.spenkana.exp.searchrepos.support.result.ExceptionalError;
 import com.spenkana.exp.searchrepos.support.result.HttpStatus;
 import com.spenkana.exp.searchrepos.support.result.Result;
@@ -14,16 +15,21 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static com.spenkana.exp.searchrepos.support.io.Json.fromString;
+import static com.spenkana.exp.searchrepos.support.io.json.jackson.Json
+    .fromString;
 import static com.spenkana.exp.searchrepos.support.result.Result.failure;
 import static com.spenkana.exp.searchrepos.support.result.Result.success;
 //todo support streams and other RESTful commands
-public class ApacheHttpPort {
+public class ApacheHttpPort extends HttpPort {
 
     public static final String WHOLE_HEADER_VALUE = "WholeHeaderValue";
 
+    @Override
     public Result<WebResponse> get(URI uri) {
         Result<WebResponse> result = submitRequest(uri);
         if (result.succeeded()) {

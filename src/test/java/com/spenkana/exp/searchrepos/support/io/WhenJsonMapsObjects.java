@@ -1,9 +1,11 @@
 package com.spenkana.exp.searchrepos.support.io;
 
+import com.spenkana.exp.searchrepos.support.io.json.jackson.Json;
 import com.spenkana.exp.searchrepos.support.result.Result;
 import org.junit.jupiter.api.Test;
 
-import static com.spenkana.exp.searchrepos.support.io.Json.fromObject;
+import static com.spenkana.exp.searchrepos.support.io.json.jackson.Json
+    .fromObject;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 

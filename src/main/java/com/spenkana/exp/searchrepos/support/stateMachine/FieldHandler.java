@@ -1,4 +1,4 @@
-package com.spenkana.exp.searchrepos.support;
+package com.spenkana.exp.searchrepos.support.stateMachine;
 
 import com.spenkana.exp.searchrepos.support.result.Result;
 import org.codehaus.plexus.util.StringUtils;

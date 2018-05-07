@@ -1,6 +1,7 @@
 # search-repos: PoC for integrated test automation
 
 ### Overview
+(See doc/Overview.png - markdown plugin won't load it.)
 
 Focussing on two aspects of the GitHub API for searching repositories, this 
 project does not attempt to be exhaustive but to provide a library of support

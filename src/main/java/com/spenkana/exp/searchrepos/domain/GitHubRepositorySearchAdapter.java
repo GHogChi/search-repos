@@ -1,5 +1,9 @@
-package com.spenkana.exp.searchrepos.support.io;
+package com.spenkana.exp.searchrepos.domain;
 
+import com.spenkana.exp.searchrepos.support.io.ApacheHttpPort;
+import com.spenkana.exp.searchrepos.support.io.HttpPort;
+import com.spenkana.exp.searchrepos.support.io.UriBuilder;
+import com.spenkana.exp.searchrepos.support.io.WebResponse;
 import com.spenkana.exp.searchrepos.support.result.Result;
 
 import java.net.URI;
@@ -23,11 +27,11 @@ public class GitHubRepositorySearchAdapter {
         .output;
     public static final String LINK_HEADER_KEY = "Link";
 
-    public static Result<WebResponse> submitWebRequest(URI uri) {
-        ApacheHttpPort port = new ApacheHttpPort();
+    public static Result<WebResponse> submitWebRequest(URI uri, HttpPort port) {
         Result<WebResponse> webResult = port.get(uri);
-        assertTrue(webResult.succeeded());
-        return success(webResult.getOutput());
+        return (webResult.succeeded())
+            ? success(webResult.output)
+            : failure(webResult.getErrorMessage());
     }
 
     private static final Pattern PAGE_NO = Pattern.compile(
@@ -39,7 +43,8 @@ public class GitHubRepositorySearchAdapter {
     //todo get headers only using HEAD method (this implementation is
     // inefficient)
     public static Result<Integer> totalPages(URI uri) {
-        Result<WebResponse> responseResult = submitWebRequest(uri);
+        Result<WebResponse> responseResult = submitWebRequest(uri,
+            new ApacheHttpPort());
         if (responseResult.failed()) {
             return failure(responseResult.getErrorMessage());
         }
